@@ -1,0 +1,9 @@
+html, body {
+    font-family: 'Montserrat', sans-serif;
+    height: 100%;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
