@@ -1,6 +1,8 @@
 <script>
-  import JobList from './JobList.svelte';
   import { Router, Link, Route } from "svelte-routing";
+
+  import JobList from "./JobList.svelte";
+  import JobInfo from "./JobInfo.svelte";
 
   export let url = "";
 </script>
@@ -16,7 +18,10 @@
 </style>
 
 <main class="content">
-  <Router url="{url}">
-     <Route path="/jobs" component="{JobList}" />
+  <Router {url}>
+    <Route path="/jobs" component={JobList} />
+    <Route path="/job/:id" let:params>
+      <JobInfo id={params.id} />
+    </Route>
   </Router>
 </main>

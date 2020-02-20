@@ -1,10 +1,11 @@
 const Router = require('koa-router');
-const jobs = require('./lib/jobs/job');
-const collections = require('./lib/collection');
+const { Worker } = require('worker_threads');
+
+const { publishEvent } = require('./lib/socketPull');
+const { getJobInfo } = require('./lib/jobs/job');
 
 const { getAll } = require('./lib/jobs/jobs');
 
-const logger = require('./lib/logger');
 const router = new Router();
 
 router.get('/jobs', async (ctx) => {
@@ -13,25 +14,27 @@ router.get('/jobs', async (ctx) => {
 });
 
 router.get('/jobs/:id', async (ctx) => {
-  const job = await collections.withCollection(jobs.COLLECTION_NAME).findOne(ctx.params.id);
+  const job = await getJobInfo(ctx.params.id);
   ctx.body = job;
 });
 
 router.post('/jobs/:id/run', async (ctx) => {
-  let res;
-  const fn = (ctx.request.body.sources && ctx.request.body.sources.length) ?
-    jobs.doJobWithSources(ctx.request.body.sources) :
-    jobs.doJob;
-  try {
-    const job = await collections.withCollection(jobs.COLLECTION_NAME).findOne(ctx.params.id);
-    res = await fn(job);
-  } catch (ex) {
-    res = {
-      status: 'ERROR',
-      data: ex,
-    };
-  }
-  ctx.body = res;
+  // TODO убрать из роутера
+  const worker = new Worker('./lib/jobs/runjob.js', {
+    workerData: {
+      sources: ctx.request.body.sources,
+      id: ctx.params.id,
+      // TODO: hardcode
+      userId: 1,
+    },
+  });
+
+  worker.on('message', publishEvent);
+
+  ctx.body = JSON.stringify({
+    status: true,
+  });
 });
+
 
 module.exports = router;

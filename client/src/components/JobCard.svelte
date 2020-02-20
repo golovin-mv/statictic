@@ -1,4 +1,6 @@
 <script>
+  import { link, Router } from "svelte-routing";
+
   import Tag from './Tag.svelte';
   import Icon from './Icon.svelte';
 
@@ -68,7 +70,6 @@
 
 </style>
 
-
 <div class="job-card">
   <div class="job-header">
     <div class="job-card__title">
@@ -91,6 +92,6 @@
     {job.description ? job.description : ''}
   </p>
   <div class="job-card__actions">
-    <a href="/job/{job.id}">ПОДРОБНЕЕ</a>
+    <a href="/job/{job.id}" use:link>ПОДРОБНЕЕ</a>
   </div>
 </div>
